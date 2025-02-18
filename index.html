@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>分析ツール：費用便益分析 & 費用対効果分析</title>
+  <!-- Bootstrap CSS (CDN) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container my-5">
+    <h1 class="mb-4">分析ツール：費用便益分析 & 費用対効果分析</h1>
+    
+    <!-- タブによる機能の切替 -->
+    <ul class="nav nav-tabs" id="analysisTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="cost-benefit-tab" data-toggle="tab" href="#cost-benefit" role="tab" aria-controls="cost-benefit" aria-selected="true">費用便益分析</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="cost-effect-tab" data-toggle="tab" href="#cost-effect" role="tab" aria-controls="cost-effect" aria-selected="false">費用対効果分析</a>
+      </li>
+    </ul>
+    
+    <div class="tab-content" id="analysisTabContent">
+      <!-- 費用便益分析のタブパネル -->
+      <div class="tab-pane fade show active" id="cost-benefit" role="tabpanel" aria-labelledby="cost-benefit-tab">
+        <div class="mt-4">
+          <h2>費用便益分析</h2>
+          <form id="benefitAnalysisForm">
+            <div class="form-group">
+              <label for="cbCost">費用 (円)</label>
+              <input type="number" class="form-control" id="cbCost" placeholder="例: 500000" required>
+            </div>
+            <div class="form-group">
+              <label for="cbBenefit">便益 (円)</label>
+              <input type="number" class="form-control" id="cbBenefit" placeholder="例: 800000" required>
+            </div>
+            <button type="submit" class="btn btn-primary">分析する</button>
+          </form>
+          <div class="mt-4">
+            <h3>結果</h3>
+            <p id="benefitResultText"></p>
+            <canvas id="benefitChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 費用対効果分析のタブパネル -->
+      <div class="tab-pane fade" id="cost-effect" role="tabpanel" aria-labelledby="cost-effect-tab">
+        <div class="mt-4">
+          <h2>費用対効果分析</h2>
+          <form id="effectivenessForm">
+            <div class="form-group">
+              <label for="ceCost">費用 (円)</label>
+              <input type="number" class="form-control" id="ceCost" placeholder="例: 500000" required>
+            </div>
+            <div class="form-group">
+              <label for="ceEffect">効果 (単位)</label>
+              <input type="number" class="form-control" id="ceEffect" placeholder="例: 100" required>
+            </div>
+            <button type="submit" class="btn btn-primary">分析する</button>
+          </form>
+          <div class="mt-4">
+            <h3>結果</h3>
+            <p id="effectResultText"></p>
+            <canvas id="effectChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+    </div> <!-- tab-content -->
+  </div> <!-- container -->
+  
+  <!-- JavaScript: 分析処理とグラフ描画 -->
+  <script>
+    // 【費用便益分析】の処理
+    document.getElementById('benefitAnalysisForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // 入力値の取得
+      const cost = parseFloat(document.getElementById('cbCost').value);
+      const benefit = parseFloat(document.getElementById('cbBenefit').value);
+      
+      if (isNaN(cost) || isNaN(benefit)) {
+        alert("正しい数値を入力してください。");
+        return;
+      }
+      
+      // 純便益と費用便益比の計算
+      const netBenefit = benefit - cost;
+      const ratio = cost !== 0 ? (benefit / cost).toFixed(2) : "無限大";
+      
+      // 結果テキストの更新
+      document.getElementById('benefitResultText').innerHTML = `
+        費用: ${cost.toLocaleString()} 円<br>
+        便益: ${benefit.toLocaleString()} 円<br>
+        純便益: ${netBenefit.toLocaleString()} 円<br>
+        費用便益比: ${ratio}
+      `;
+      
+      // グラフ描画
+      renderBenefitChart(cost, benefit);
+    });
+    
+    let benefitChart;
+    function renderBenefitChart(cost, benefit) {
+      const ctx = document.getElementById('benefitChart').getContext('2d');
+      
+      // 既存のグラフがあれば破棄
+      if (benefitChart) {
+        benefitChart.destroy();
+      }
+      
+      benefitChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['費用', '便益'],
+          datasets: [{
+            label: '金額 (円)',
+            data: [cost, benefit],
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.5)',
+              'rgba(75, 192, 192, 0.5)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(75, 192, 192, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+    
+    // 【費用対効果分析】の処理
+    document.getElementById('effectivenessForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // 入力値の取得
+      const cost = parseFloat(document.getElementById('ceCost').value);
+      const effect = parseFloat(document.getElementById('ceEffect').value);
+      
+      if (isNaN(cost) || isNaN(effect) || effect === 0) {
+        alert("正しい数値を入力してください。効果はゼロであってはなりません。");
+        return;
+      }
+      
+      // 単位効果あたりの費用の計算
+      const costPerEffect = (cost / effect).toFixed(2);
+      
+      // 結果テキストの更新
+      document.getElementById('effectResultText').innerHTML = `
+        費用: ${cost.toLocaleString()} 円<br>
+        効果: ${effect.toLocaleString()} 単位<br>
+        単位効果あたりの費用: ${costPerEffect} 円/単位
+      `;
+      
+      // グラフ描画
+      renderEffectChart(cost, effect);
+    });
+    
+    let effectChart;
+    function renderEffectChart(cost, effect) {
+      const ctx = document.getElementById('effectChart').getContext('2d');
+      
+      // 既存のグラフがあれば破棄
+      if (effectChart) {
+        effectChart.destroy();
+      }
+      
+      effectChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['費用', '効果'],
+          datasets: [{
+            label: '値',
+            data: [cost, effect],
+            backgroundColor: [
+              'rgba(54, 162, 235, 0.5)',
+              'rgba(255, 206, 86, 0.5)'
+            ],
+            borderColor: [
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          },
+          plugins: {
+            legend: {
+              display: false
+            }
+          }
+        }
+      });
+    }
+  </script>
+  
+  <!-- BootstrapのJSと依存ライブラリ (jQuery, Popper.js) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
