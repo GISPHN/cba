@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>分析ツール：費用便益分析 & 費用対効果分析</title>
+  <title>分析ツール (費用便益 / 費用対効果 / ICER)</title>
   <!-- Bootstrap CSS (CDN) -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
   <!-- Chart.js (CDN) -->
@@ -11,108 +11,149 @@
 </head>
 <body>
   <div class="container my-5">
-    <h1 class="mb-4">分析ツール：費用便益分析 & 費用対効果分析</h1>
+    <h1 class="mb-4">分析ツール</h1>
     
-    <!-- タブによる機能の切替 -->
+    <!-- タブメニュー -->
     <ul class="nav nav-tabs" id="analysisTab" role="tablist">
       <li class="nav-item">
-        <a class="nav-link active" id="cost-benefit-tab" data-toggle="tab" href="#cost-benefit" role="tab" aria-controls="cost-benefit" aria-selected="true">費用便益分析</a>
+        <a class="nav-link active" id="cba-tab" data-toggle="tab" href="#cba" role="tab" aria-controls="cba" aria-selected="true">費用便益分析</a>
       </li>
       <li class="nav-item">
-        <a class="nav-link" id="cost-effect-tab" data-toggle="tab" href="#cost-effect" role="tab" aria-controls="cost-effect" aria-selected="false">費用対効果分析</a>
+        <a class="nav-link" id="cea-tab" data-toggle="tab" href="#cea" role="tab" aria-controls="cea" aria-selected="false">費用対効果分析</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="icer-tab" data-toggle="tab" href="#icer" role="tab" aria-controls="icer" aria-selected="false">増分費用効果比 (ICER)</a>
       </li>
     </ul>
     
+    <!-- タブのコンテンツ -->
     <div class="tab-content" id="analysisTabContent">
-      <!-- 費用便益分析のタブパネル -->
-      <div class="tab-pane fade show active" id="cost-benefit" role="tabpanel" aria-labelledby="cost-benefit-tab">
+      
+      <!-- 費用便益分析 (CBA) -->
+      <div class="tab-pane fade show active" id="cba" role="tabpanel" aria-labelledby="cba-tab">
         <div class="mt-4">
           <h2>費用便益分析</h2>
-          <form id="benefitAnalysisForm">
+          <form id="cbaForm">
             <div class="form-group">
-              <label for="cbCost">費用 (円)</label>
-              <input type="number" class="form-control" id="cbCost" placeholder="例: 500000" required>
+              <label for="cbaCost">費用 (円)</label>
+              <input type="number" class="form-control" id="cbaCost" placeholder="例: 500000" required>
             </div>
             <div class="form-group">
-              <label for="cbBenefit">便益 (円)</label>
-              <input type="number" class="form-control" id="cbBenefit" placeholder="例: 800000" required>
+              <label for="cbaBenefit">便益 (円)</label>
+              <input type="number" class="form-control" id="cbaBenefit" placeholder="例: 800000" required>
             </div>
             <button type="submit" class="btn btn-primary">分析する</button>
           </form>
+          
           <div class="mt-4">
-            <h3>結果</h3>
-            <p id="benefitResultText"></p>
-            <canvas id="benefitChart" width="400" height="200"></canvas>
+            <h4>結果</h4>
+            <p id="cbaResultText"></p>
+            <canvas id="cbaChart" width="400" height="200"></canvas>
           </div>
         </div>
       </div>
       
-      <!-- 費用対効果分析のタブパネル -->
-      <div class="tab-pane fade" id="cost-effect" role="tabpanel" aria-labelledby="cost-effect-tab">
+      <!-- 費用対効果分析 (CEA) -->
+      <div class="tab-pane fade" id="cea" role="tabpanel" aria-labelledby="cea-tab">
         <div class="mt-4">
           <h2>費用対効果分析</h2>
-          <form id="effectivenessForm">
+          <form id="ceaForm">
             <div class="form-group">
-              <label for="ceCost">費用 (円)</label>
-              <input type="number" class="form-control" id="ceCost" placeholder="例: 500000" required>
+              <label for="ceaCost">費用 (円)</label>
+              <input type="number" class="form-control" id="ceaCost" placeholder="例: 500000" required>
             </div>
             <div class="form-group">
-              <label for="ceEffect">効果 (単位)</label>
-              <input type="number" class="form-control" id="ceEffect" placeholder="例: 100" required>
+              <label for="ceaEffect">効果 (単位)</label>
+              <input type="number" class="form-control" id="ceaEffect" placeholder="例: 100" required>
             </div>
             <button type="submit" class="btn btn-primary">分析する</button>
           </form>
+          
           <div class="mt-4">
-            <h3>結果</h3>
-            <p id="effectResultText"></p>
-            <canvas id="effectChart" width="400" height="200"></canvas>
+            <h4>結果</h4>
+            <p id="ceaResultText"></p>
+            <canvas id="ceaChart" width="400" height="200"></canvas>
           </div>
         </div>
       </div>
-    </div> <!-- tab-content -->
-  </div> <!-- container -->
+      
+      <!-- 増分費用効果比 (ICER) -->
+      <div class="tab-pane fade" id="icer" role="tabpanel" aria-labelledby="icer-tab">
+        <div class="mt-4">
+          <h2>増分費用効果比 (ICER)</h2>
+          <form id="icerForm">
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <h5>新技術 (A)</h5>
+                <label for="icerCostA">費用 (円)</label>
+                <input type="number" class="form-control" id="icerCostA" placeholder="例: 2000000" required>
+                <label for="icerEffectA" class="mt-3">効果 (単位)</label>
+                <input type="number" class="form-control" id="icerEffectA" placeholder="例: 10" required>
+              </div>
+              <div class="form-group col-md-6">
+                <h5>既存技術 (B)</h5>
+                <label for="icerCostB">費用 (円)</label>
+                <input type="number" class="form-control" id="icerCostB" placeholder="例: 1800000" required>
+                <label for="icerEffectB" class="mt-3">効果 (単位)</label>
+                <input type="number" class="form-control" id="icerEffectB" placeholder="例: 8" required>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">分析する</button>
+          </form>
+          
+          <div class="mt-4">
+            <h4>結果</h4>
+            <p id="icerResultText"></p>
+            <canvas id="icerChart" width="400" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      
+    </div> <!-- /.tab-content -->
+  </div> <!-- /.container -->
   
-  <!-- JavaScript: 分析処理とグラフ描画 -->
+  <!-- JavaScript: 各分析処理とグラフ描画 -->
   <script>
-    // 【費用便益分析】の処理
-    document.getElementById('benefitAnalysisForm').addEventListener('submit', function(e) {
+    /****************************************************************
+     * 1) 費用便益分析 (Cost-Benefit Analysis: CBA)
+     ****************************************************************/
+    document.getElementById('cbaForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      // 入力値の取得
-      const cost = parseFloat(document.getElementById('cbCost').value);
-      const benefit = parseFloat(document.getElementById('cbBenefit').value);
+      const cost = parseFloat(document.getElementById('cbaCost').value);
+      const benefit = parseFloat(document.getElementById('cbaBenefit').value);
       
       if (isNaN(cost) || isNaN(benefit)) {
         alert("正しい数値を入力してください。");
         return;
       }
       
-      // 純便益と費用便益比の計算
+      // 純便益 (便益 - 費用) と 費用便益比 (便益 / 費用)
       const netBenefit = benefit - cost;
-      const ratio = cost !== 0 ? (benefit / cost).toFixed(2) : "無限大";
+      const ratio = cost !== 0 ? (benefit / cost).toFixed(2) : "∞";
       
-      // 結果テキストの更新
-      document.getElementById('benefitResultText').innerHTML = `
-        費用: ${cost.toLocaleString()} 円<br>
-        便益: ${benefit.toLocaleString()} 円<br>
-        純便益: ${netBenefit.toLocaleString()} 円<br>
-        費用便益比: ${ratio}
+      // 結果テキスト
+      const cbaResultText = `
+        <strong>費用:</strong> ${cost.toLocaleString()} 円<br>
+        <strong>便益:</strong> ${benefit.toLocaleString()} 円<br>
+        <strong>純便益 (Benefit - Cost):</strong> ${netBenefit.toLocaleString()} 円<br>
+        <strong>費用便益比 (Benefit / Cost):</strong> ${ratio}
       `;
+      document.getElementById('cbaResultText').innerHTML = cbaResultText;
       
       // グラフ描画
-      renderBenefitChart(cost, benefit);
+      renderCBAChart(cost, benefit);
     });
     
-    let benefitChart;
-    function renderBenefitChart(cost, benefit) {
-      const ctx = document.getElementById('benefitChart').getContext('2d');
+    let cbaChart;
+    function renderCBAChart(cost, benefit) {
+      const ctx = document.getElementById('cbaChart').getContext('2d');
       
-      // 既存のグラフがあれば破棄
-      if (benefitChart) {
-        benefitChart.destroy();
+      if (cbaChart) {
+        cbaChart.destroy();
       }
       
-      benefitChart = new Chart(ctx, {
+      cbaChart = new Chart(ctx, {
         type: 'bar',
         data: {
           labels: ['費用', '便益'],
@@ -131,6 +172,7 @@
           }]
         },
         options: {
+          responsive: true,
           scales: {
             y: {
               beginAtZero: true
@@ -145,46 +187,47 @@
       });
     }
     
-    // 【費用対効果分析】の処理
-    document.getElementById('effectivenessForm').addEventListener('submit', function(e) {
+    /****************************************************************
+     * 2) 費用対効果分析 (Cost-Effectiveness Analysis: CEA)
+     ****************************************************************/
+    document.getElementById('ceaForm').addEventListener('submit', function(e) {
       e.preventDefault();
       
-      // 入力値の取得
-      const cost = parseFloat(document.getElementById('ceCost').value);
-      const effect = parseFloat(document.getElementById('ceEffect').value);
+      const cost = parseFloat(document.getElementById('ceaCost').value);
+      const effect = parseFloat(document.getElementById('ceaEffect').value);
       
       if (isNaN(cost) || isNaN(effect) || effect === 0) {
-        alert("正しい数値を入力してください。効果はゼロであってはなりません。");
+        alert("費用・効果を正しく入力してください。効果が0では計算できません。");
         return;
       }
       
-      // 単位効果あたりの費用の計算
+      // 単位効果あたりの費用
       const costPerEffect = (cost / effect).toFixed(2);
       
-      // 結果テキストの更新
-      document.getElementById('effectResultText').innerHTML = `
-        費用: ${cost.toLocaleString()} 円<br>
-        効果: ${effect.toLocaleString()} 単位<br>
-        単位効果あたりの費用: ${costPerEffect} 円/単位
+      // 結果テキスト
+      const ceaResultText = `
+        <strong>費用:</strong> ${cost.toLocaleString()} 円<br>
+        <strong>効果:</strong> ${effect.toLocaleString()} 単位<br>
+        <strong>単位効果あたりの費用 (Cost / Effect):</strong> ${costPerEffect} 円/単位
       `;
+      document.getElementById('ceaResultText').innerHTML = ceaResultText;
       
       // グラフ描画
-      renderEffectChart(cost, effect);
+      renderCEAChart(cost, effect);
     });
     
-    let effectChart;
-    function renderEffectChart(cost, effect) {
-      const ctx = document.getElementById('effectChart').getContext('2d');
+    let ceaChart;
+    function renderCEAChart(cost, effect) {
+      const ctx = document.getElementById('ceaChart').getContext('2d');
       
-      // 既存のグラフがあれば破棄
-      if (effectChart) {
-        effectChart.destroy();
+      if (ceaChart) {
+        ceaChart.destroy();
       }
       
-      effectChart = new Chart(ctx, {
+      ceaChart = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: ['費用', '効果'],
+          labels: ['費用 (円)', '効果 (単位)'],
           datasets: [{
             label: '値',
             data: [cost, effect],
@@ -200,6 +243,7 @@
           }]
         },
         options: {
+          responsive: true,
           scales: {
             y: {
               beginAtZero: true
@@ -208,6 +252,95 @@
           plugins: {
             legend: {
               display: false
+            }
+          }
+        }
+      });
+    }
+    
+    /****************************************************************
+     * 3) 増分費用効果比 (ICER: Incremental Cost-Effectiveness Ratio)
+     ****************************************************************/
+    document.getElementById('icerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // 新技術(A)と既存技術(B)の費用・効果
+      const costA = parseFloat(document.getElementById('icerCostA').value);
+      const effectA = parseFloat(document.getElementById('icerEffectA').value);
+      const costB = parseFloat(document.getElementById('icerCostB').value);
+      const effectB = parseFloat(document.getElementById('icerEffectB').value);
+      
+      if (
+        isNaN(costA) || isNaN(effectA) ||
+        isNaN(costB) || isNaN(effectB)
+      ) {
+        alert("正しい数値を入力してください。");
+        return;
+      }
+      
+      // 差分費用 (C_A - C_B) と 差分効果 (E_A - E_B)
+      const deltaCost = costA - costB;
+      const deltaEffect = effectA - effectB;
+      
+      // ICER計算 (増分費用効果比)
+      if (deltaEffect === 0) {
+        alert("効果の差が 0 です。ICER を計算できません。");
+        return;
+      }
+      const icer = (deltaCost / deltaEffect).toFixed(2);
+      
+      // 結果テキスト
+      const icerResultText = `
+        <strong>新技術 (A)</strong><br>
+        費用: ${costA.toLocaleString()} 円<br>
+        効果: ${effectA.toLocaleString()} 単位<br><br>
+        <strong>既存技術 (B)</strong><br>
+        費用: ${costB.toLocaleString()} 円<br>
+        効果: ${effectB.toLocaleString()} 単位<br><br>
+        <strong>差分費用 (ΔC):</strong> ${deltaCost.toLocaleString()} 円<br>
+        <strong>差分効果 (ΔE):</strong> ${deltaEffect.toLocaleString()} 単位<br>
+        <strong>増分費用効果比 (ICER):</strong> ${icer} 円/単位
+      `;
+      document.getElementById('icerResultText').innerHTML = icerResultText;
+      
+      // グラフ描画
+      renderICERChart(costA, effectA, costB, effectB);
+    });
+    
+    let icerChart;
+    function renderICERChart(costA, effectA, costB, effectB) {
+      const ctx = document.getElementById('icerChart').getContext('2d');
+      
+      if (icerChart) {
+        icerChart.destroy();
+      }
+      
+      icerChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['費用 (円)', '効果 (単位)'],
+          datasets: [
+            {
+              label: '新技術 (A)',
+              data: [costA, effectA],
+              backgroundColor: 'rgba(54, 162, 235, 0.5)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            },
+            {
+              label: '既存技術 (B)',
+              data: [costB, effectB],
+              backgroundColor: 'rgba(255, 206, 86, 0.5)',
+              borderColor: 'rgba(255, 206, 86, 1)',
+              borderWidth: 1
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            y: {
+              beginAtZero: true
             }
           }
         }
